@@ -22,6 +22,12 @@
             app:title="@string/settings_cat_general_sw_disable_kanban_animation" />
         <SwitchPreferenceCompat
             app:iconSpaceReserved="false"
+            app:key="settings_cat_general_sw_enable_home_history"
+            app:selectable="true"
+            app:summary="@string/settings_cat_general_sm_enable_home_history"
+            app:title="@string/settings_cat_general_sw_enable_home_history" />
+        <SwitchPreferenceCompat
+            app:iconSpaceReserved="false"
             app:key="settings_cat_general_sw_enable_transparent_systembar"
             app:selectable="true"
             app:summary="@string/settings_cat_general_sm_enable_transparent_systembar"

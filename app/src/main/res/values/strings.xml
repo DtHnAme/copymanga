@@ -148,6 +148,8 @@
     <string name="settings_cat_general_sm_disable_kanban_animation">如加载卡顿可考虑开启此选项</string>
     <string name="settings_cat_general_sw_enable_transparent_systembar">沉浸式系统栏</string>
     <string name="settings_cat_general_sm_enable_transparent_systembar">使全面屏设备导航栏和状态栏更沉浸</string>
+    <string name="settings_cat_general_sw_enable_home_history">主页显示浏览历史</string>
+    <string name="settings_cat_general_sm_enable_home_history">在主页显示云端浏览历史（需登录）</string>
 
     <string name="settings_cat_net">网络</string>
     <string name="settings_cat_net_sb_title_image_resolution">图片分辨率</string>

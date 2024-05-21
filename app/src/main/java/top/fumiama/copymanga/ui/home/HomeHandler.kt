@@ -15,9 +15,11 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.animation.doOnEnd
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.preference.PreferenceManager
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.model.GlideUrl
+import com.google.gson.Gson
 import com.to.aboomy.pager2banner.Banner
 import com.to.aboomy.pager2banner.IndicatorView
 import com.to.aboomy.pager2banner.ScaleInTransformer
@@ -28,9 +30,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import top.fumiama.copymanga.MainActivity
 import top.fumiama.copymanga.json.ComicStructure
+import top.fumiama.copymanga.json.HistoryBookListStructure
 import top.fumiama.copymanga.json.IndexStructure
 import top.fumiama.copymanga.template.http.AutoDownloadHandler
+import top.fumiama.copymanga.template.http.PausableDownloader
 import top.fumiama.copymanga.tools.api.CMApi
 import top.fumiama.copymanga.tools.ui.GlideHideLottieViewListener
 import top.fumiama.copymanga.tools.ui.Navigate
@@ -132,6 +137,31 @@ class HomeHandler(private val that: WeakReference<HomeFragment>) : AutoDownloadH
         }
     }
 
+    private suspend fun inflateHistory() {
+        val pref = MainActivity.mainWeakReference?.get()?.let { PreferenceManager.getDefaultSharedPreferences(it) }
+        if (MainActivity.member?.hasLogin == true && pref!!.getBoolean("settings_cat_general_sw_enable_home_history", false)) {
+            runCatching {
+                PausableDownloader(homeF?.getString(R.string.historyApiUrl)!!.format(CMApi.myHostApiUrl, 0)) { data ->
+                    val history = Gson().fromJson(data.decodeToString(), HistoryBookListStructure::class.java)
+                    history.results.list.let {
+                        var comics = arrayOf<ComicStructure>()
+                        for ((i, book) in it.withIndex()){
+                            if (i > 2) break
+                            comics += ComicStructure().apply {
+                                name = book.comic.name + "\n" + "已读至${book.last_chapter_name}"
+                                cover = book.comic.cover
+                                path_word = book.comic.path_word
+                            }
+                        }
+                        if(comics.isNotEmpty()) allocateLine(homeF?.getString(R.string.menu_history)?:"", R.drawable.ic_home_history, comics) {
+                            homeF?.findNavController()?.navigate(R.id.nav_history)
+                        }
+                    }
+                }.run()
+            }
+        }
+    }
+
     private suspend fun inflateRec() {
         index?.results?.recComics?.list?.let {
             var comics = arrayOf<ComicStructure>()
@@ -217,6 +247,7 @@ class HomeHandler(private val that: WeakReference<HomeFragment>) : AutoDownloadH
         homeF?.lifecycleScope?.launch {
             withContext(Dispatchers.IO) {
                 if (indexLines.isNotEmpty()) indexLines = arrayOf()
+                inflateHistory()
                 inflateRec()
                 inflateTopics()
                 inflateHot()
@@ -298,7 +329,7 @@ class HomeHandler(private val that: WeakReference<HomeFragment>) : AutoDownloadH
         finish: Boolean = false, isTopic: Boolean = false, onClick: (() -> Unit)? = null
     ): Int = withContext(Dispatchers.IO) {
         val p = indexLines.size
-        val c = comics.size / 3
+        val c = if (comics.size > 3) comics.size / 3 else 1
         homeF?.layoutInflater?.inflate(
             when(c){
                 1 -> R.layout.line_1bookline
@@ -334,6 +365,12 @@ class HomeHandler(private val that: WeakReference<HomeFragment>) : AutoDownloadH
             )
             card = v.findViewById(++id)
         }
+        if (comics.size < 3) do {
+            if (card.tic.text.isEmpty()) {
+                card.visibility = View.GONE
+            }
+            card = v.findViewById(++id)
+        } while (card != null)
     }
 
     private var cardLoadingWaits = AtomicInteger()

@@ -692,11 +692,15 @@ class ScaleImageView : ImageView {
                 if (mOnClickListener != null) {
                     mOnClickListener!!.onClick(this@ScaleImageView)
                 }
-                (event.x / width).let {
-                    when {
-                        it <= 1.0 / 3.0 -> pm?.toPreviousPage()
-                        it <= 2.0 / 3.0 -> pm?.toggleDrawer()
-                        else -> pm?.toNextPage()
+                if (getTag(FLAG_IS_VERTICAL) == true) {
+                    pm?.toggleDrawer()
+                } else {
+                    (event.x / width).let {
+                        when {
+                            it <= 1.0 / 3.0 -> pm?.toPreviousPage()
+                            it <= 2.0 / 3.0 -> pm?.toggleDrawer()
+                            else -> pm?.toNextPage()
+                        }
                     }
                 }
                 return true
@@ -709,6 +713,10 @@ class ScaleImageView : ImageView {
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         super.onTouchEvent(event)
+        if (getTag(FLAG_IS_VERTICAL) == true) {
+            mGestureDetector.onTouchEvent(event)
+            return true
+        }
         val action = event.action and MotionEvent.ACTION_MASK
         Log.d("MySi", "Outer Scale: ${getMatrixScale(mOuterMatrix)[0]}")
         //最后一个点抬起或者取消，结束所有模式
@@ -1640,5 +1648,8 @@ class ScaleImageView : ImageView {
         const val PINCH_MODE_SCALE = 2
 
         var pm: PagesManager? = null
+
+        // Flags
+        const val FLAG_IS_VERTICAL = 0
     }
 }

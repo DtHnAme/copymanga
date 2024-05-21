@@ -419,6 +419,7 @@ class ViewMangaActivity : TitleActivityTemplate() {
         imgView.apply { post {
             setImageBitmap(bitmap2load)
             if(!isPlaceholder && isVertical) {
+                setTag(ScaleImageView.FLAG_IS_VERTICAL, true)
                 setHeight2FitImgWidth()
                 Log.d("MyVM", "dec remainingImageCount")
                 mHandler.sendEmptyMessage(VMHandler.DECREASE_IMAGE_COUNT_AND_RESTORE_PAGE_NUMBER_AT_ZERO)

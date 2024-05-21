@@ -11,11 +11,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import top.fumiama.copymanga.MainActivity
 import top.fumiama.copymanga.tools.ui.UITools
 import top.fumiama.copymanga.views.AutoHideEditTextPreferenceDialogFragmentCompat
 import top.fumiama.dmzj.copymanga.R
 
 class SettingsFragment: PreferenceFragmentCompat() {
+    private var isSettingsChanged = false
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         lifecycleScope.launch {
             withContext(Dispatchers.IO) {
@@ -24,6 +26,19 @@ class SettingsFragment: PreferenceFragmentCompat() {
                     setPreferencesFromResource(R.xml.pref_setting, rootKey)
                 }
             }
+        }
+    }
+
+    override fun onPreferenceTreeClick(preference: Preference): Boolean {
+        isSettingsChanged = true
+        return super.onPreferenceTreeClick(preference)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        if (isSettingsChanged) {
+            MainActivity.mainWeakReference?.get()?.recreate()
         }
     }
 

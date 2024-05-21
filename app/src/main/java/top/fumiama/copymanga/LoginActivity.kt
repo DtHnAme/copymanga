@@ -43,6 +43,7 @@ class LoginActivity : AppCompatActivity() {
                 if (isLogout) {
                     MainActivity.member?.logout()
                     MainActivity.mainWeakReference?.get()?.refreshUserInfo()
+                    MainActivity.mainWeakReference?.get()?.recreate()
                     Toast.makeText(
                         this@LoginActivity,
                         R.string.login_restart_to_apply,
@@ -55,6 +56,7 @@ class LoginActivity : AppCompatActivity() {
                 Log.d("MyLA", "login return code: ${l?.code}")
                 if (l?.code == 200) {
                     MainActivity.mainWeakReference?.get()?.refreshUserInfo()
+                    MainActivity.mainWeakReference?.get()?.recreate()
                     finish()
                     return@launch
                 }

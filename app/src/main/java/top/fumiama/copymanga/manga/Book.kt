@@ -20,8 +20,8 @@ class Book(val path: String, private val getString: (Int) -> String, private val
     }
     private val mUserAgent = getString(R.string.pc_ua).format(DownloadTools.app_ver)
     private var mBook: BookInfoStructure? = null
-    private var mGroupPathWords = arrayOf<String>()
-    private var mKeys = arrayOf<String>()
+    private var mGroupPathWords = arrayListOf<String>()
+    private var mKeys = arrayListOf<String>()
     private var mCounts = intArrayOf()
     private var mVolumes = arrayOf<VolumeStructure>()
     private var mJsonString = ""
@@ -77,12 +77,17 @@ class Book(val path: String, private val getString: (Int) -> String, private val
                 Gson().fromJson(it.reader(), BookInfoStructure::class.java)
             }
             if (isDownload) saveInfo(data)
-            mGroupPathWords = arrayOf()
-            mKeys = arrayOf()
+            mGroupPathWords = arrayListOf()
+            mKeys = arrayListOf()
             mCounts = intArrayOf()
             mBook?.results?.groups?.values?.forEach {
-                mKeys += it.name
-                mGroupPathWords += it.path_word
+                if (it.path_word.equals("default")) {
+                    mKeys.add(0, it.name)
+                    mGroupPathWords.add(0, it.path_word)
+                } else {
+                    mKeys += it.name
+                    mGroupPathWords += it.path_word
+                }
                 if (it.count == 0) {
                     it.count = 1
                 }
@@ -156,7 +161,7 @@ class Book(val path: String, private val getString: (Int) -> String, private val
             val groupFile = File(mangaFolder, "grps.json")
             if (!groupFile.exists()) return@let false
             groupFile.inputStream().use {
-                mKeys = Gson().fromJson(it.reader(), Array<String>::class.java)
+                mKeys = Gson().fromJson(it.reader(), ArrayList<String>()::class.java)
             }
             return@let true
         }?:false
